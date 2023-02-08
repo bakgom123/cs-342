@@ -1,0 +1,104 @@
+-- CS342 HW2
+-- Gunju Yoo
+-- Feb 2, 2023
+
+
+--1
+USE Ap
+GO
+
+--2
+SELECT *
+FROM Vendors JOIN Invoices
+  ON Vendors.VendorID = Invoices.VendorID
+WHERE VendorCity = 'New York'
+GO
+
+--3
+SELECT VendorName, InvoiceNumber, InvoiceDate,
+       InvoiceTotal - PaymentTotal - CreditTotal AS Balance
+FROM Vendors JOIN Invoices
+  ON Vendors.VendorID = Invoices.VendorID
+WHERE InvoiceTotal - PaymentTotal - CreditTotal > 0
+ORDER BY Balance DESC;
+GO
+
+--4
+SELECT VendorName, VendorState
+FROM Vendors
+WHERE VendorState = 'CA' OR VendorState = 'NY'
+UNION
+  SELECT VendorName, 'Neither'
+  FROM Vendors
+  WHERE VendorState <> 'CA' AND VendorState <> 'NY'
+ORDER BY VendorName;
+GO
+
+--5
+USE pubs
+GO
+
+--6
+SELECT *
+FROM authors
+WHERE phone LIKE '801%'
+GO
+
+--7
+SELECT a.au_fname "First Name"
+        ,a.au_lname "Last Name"
+      ,t.title "Title"
+FROM authors a LEFT OUTER JOIN titleauthor ta
+    ON a.au_id = ta.au_id
+      LEFT OUTER JOIN titles t
+      ON ta.title_id = t.title_id
+GO
+
+--8
+SELECT 'Publisher' as 'Type', pub_name as 'Name', State as 'State'
+FROM pubs.dbo.publishers
+UNION
+SELECT 'Vendor' as 'Type', VendorName as 'Name', VendorState as 'State'
+FROM AP.dbo.Vendors
+ORDER BY State
+GO
+
+--9
+SELECT au_lname + ',' + au_fname as 'Author',
+		titles.title as Title,
+		stores.stor_name as 'Store Name',
+        stores.state as 'Store State'
+FROM authors
+JOIN titleauthor 
+	ON authors.au_id = titleauthor.au_id
+JOIN titles
+	ON titleauthor.title_id = titles.title_id
+JOIN sales
+	ON titles.title_id = sales.title_id
+JOIN stores
+	On sales.stor_id = stores.stor_id
+ORDER BY Author , [Store Name]
+GO
+
+--10
+USE AdventureWorks2017
+GO
+
+--11
+SELECT TOP 4 e.BusinessEntityID as 'Employee ID',
+	   e.LoginID as 'Employee Login ID',
+	   ph.rate as 'Rate',
+	   ph.RateChangeDate as 'Rate Change Date'
+FROM HumanResources.Employee e
+JOIN HumanResources.EmployeePayHistory ph 
+	ON e.BusinessEntityID = ph.BusinessEntityID
+ORDER BY Rate DESC
+
+--12
+SELECT e.loginID, a.AddressLine1
+FROM HumanResources.Employee e
+JOIN Person.BusinessEntityAddress pba
+	ON e.BusinessEntityID = pba.BusinessEntityID
+JOIN Person.Address a
+	ON pba.AddressID = a.AddressID
+WHERE a.AddressLine1 IS NULL
